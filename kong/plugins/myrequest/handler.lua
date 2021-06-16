@@ -65,6 +65,16 @@ end --]]
 -- runs in the 'access_by_lua_block'
 function plugin:access(plugin_conf)
 
+local custom_auth = kong.request.get_header("x-custom-auth")
+
+   -- Terminate request early if our custom authentication header
+   -- does not exist
+   if not custom_auth then
+     return kong.response.exit(401, "Invalid Credentials")
+   end
+
+   -- Remove custom authentication header from request
+   kong.service.request.clear_header('x-custom-auth')
   -- your custom code here
   kong.log.inspect(plugin_conf)   -- check the logs for a pretty-printed config!
   kong.service.request.set_header(plugin_conf.request_header, "this is on a request")
